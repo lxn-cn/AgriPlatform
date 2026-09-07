@@ -1,0 +1,24 @@
+# 依赖
+node_modules/
+venv/
+.venv/
+
+# 编译产物
+dist/
+target/
+__pycache__/
+*.class
+
+# IDE
+.idea/
+.vscode/
+
+# 环境变量与密钥（千万别把密码传到网上）
+.env
+*.local
+
+# 日志
+*.log
+
+# Claude Code 本地配置
+.claude/

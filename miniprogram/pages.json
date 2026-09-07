@@ -1,0 +1,116 @@
+{
+    "easycom" : {
+        "autoscan" : true,
+        "custom" : {}
+    },
+    "pages" : [
+        {
+            "path" : "pages/index/index",
+            "style" : {
+                "navigationBarTitleText" : "天津农特产",
+                "enablePullDownRefresh" : true
+            }
+        },
+        {
+            "path" : "pages/search/search",
+            "style" : { "navigationBarTitleText" : "搜索" }
+        },
+        {
+            "path" : "pages/farm/list",
+            "style" : {
+                "navigationBarTitleText" : "农园体验",
+                "enablePullDownRefresh" : true
+            }
+        },
+        {
+            "path" : "pages/farm/detail",
+            "style" : { "navigationBarTitleText" : "农园详情" }
+        },
+        {
+            "path" : "pages/farm/appointment",
+            "style" : { "navigationBarTitleText" : "预约采摘" }
+        },
+        {
+            "path" : "pages/appointment/pay",
+            "style" : { "navigationBarTitleText" : "预约支付" }
+        },
+        {
+            "path" : "pages/appointment/my",
+            "style" : { "navigationBarTitleText" : "我的预约" }
+        },
+        {
+            "path" : "pages/appointment/detail",
+            "style" : { "navigationBarTitleText" : "预约详情" }
+        },
+        {
+            "path" : "pages/review/post",
+            "style" : { "navigationBarTitleText" : "发布评价" }
+        },
+        {
+            "path" : "pages/product/list",
+            "style" : {
+                "navigationBarTitleText" : "农特产商城",
+                "enablePullDownRefresh" : true
+            }
+        },
+        {
+            "path" : "pages/product/detail",
+            "style" : { "navigationBarTitleText" : "商品详情" }
+        },
+        {
+            "path" : "pages/cart",
+            "style" : { "navigationBarTitleText" : "购物车" }
+        },
+        {
+            "path" : "pages/address/list",
+            "style" : { "navigationBarTitleText" : "收货地址" }
+        },
+        {
+            "path" : "pages/address/edit",
+            "style" : { "navigationBarTitleText" : "编辑收货地址" }
+        },
+        {
+            "path" : "pages/order/confirm",
+            "style" : { "navigationBarTitleText" : "确认订单" }
+        },
+        {
+            "path" : "pages/order/pay",
+            "style" : { "navigationBarTitleText" : "订单支付" }
+        },
+        {
+            "path" : "pages/order/my",
+            "style" : { "navigationBarTitleText" : "我的订单" }
+        },
+        {
+            "path" : "pages/order/detail",
+            "style" : { "navigationBarTitleText" : "订单详情" }
+        },
+        {
+            "path" : "pages/login/login",
+            "style" : { "navigationBarTitleText" : "登录" }
+        },
+        {
+            "path" : "pages/my/my",
+            "style" : { "navigationBarTitleText" : "我的" }
+        },
+        {
+            "path" : "pages/favorite/my",
+            "style" : { "navigationBarTitleText" : "我的收藏" }
+        },
+        {
+            "path" : "pages/feedback/post",
+            "style" : { "navigationBarTitleText" : "意见反馈" }
+        },
+        {
+            "path" : "pages/help/help",
+            "style" : { "navigationBarTitleText" : "帮助中心" }
+        }
+    ],
+    "globalStyle" : {
+        "navigationBarTextStyle" : "white",
+        "navigationBarTitleText" : "天津农特产",
+        "navigationBarBackgroundColor" : "#2E8B57",
+        "backgroundColor" : "#F5F6F2",
+        "backgroundTextStyle" : "dark"
+    }
+}

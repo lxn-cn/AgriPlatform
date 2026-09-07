@@ -1,0 +1,50 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: agri-platform-backend
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 本机 MySQL，库名 agri_platform（需先执行 db/schema.sql）
+    url: 'jdbc:mysql://localhost:3306/agri_platform?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&tinyInt1isBit=false'
+    username: ${DB_USERNAME:root}
+    # 密码不写入仓库，通过环境变量 DB_PASSWORD 设置（见 README「环境变量配置」）
+    password: ${DB_PASSWORD:}
+  redis:
+    # Redis 运行于本机 6379，无密码
+    host: localhost
+    port: 6379
+    timeout: 3000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        max-wait: -1ms
+  jackson:
+    default-property-inclusion: non_null
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+
+# 微信小程序配置（测试号）
+wechat:
+  appid: ${WECHAT_APPID:wx91a769218cd055a7}
+  # secret 不写入仓库，通过环境变量 WECHAT_SECRET 设置
+  secret: ${WECHAT_SECRET:}
+
+# JWT 配置（HS256 密钥与过期时间）
+jwt:
+  # 本地开发用默认值即可；生产环境务必通过环境变量 JWT_SECRET 提供强密钥
+  secret: ${JWT_SECRET:local-dev-jwt-secret-not-for-production}
+  expire-days: 7
+
+logging:
+  level:
+    com.agri.platform: info
