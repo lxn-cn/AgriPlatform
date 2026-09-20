@@ -33,9 +33,9 @@ mybatis-plus:
     db-config:
       id-type: auto
 
-# 微信小程序配置（测试号）
+# 微信小程序配置（正式小程序：津采农园）
 wechat:
-  appid: ${WECHAT_APPID:wx91a769218cd055a7}
+  appid: ${WECHAT_APPID:wx15b47e26e00c89d5}
   # secret 不写入仓库，通过环境变量 WECHAT_SECRET 设置
   secret: ${WECHAT_SECRET:}
 

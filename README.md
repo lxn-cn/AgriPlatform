@@ -28,9 +28,9 @@
 | 环境变量 | 必填 | 说明 |
 |---|---|---|
 | `DB_PASSWORD` | ✅ | 本机 MySQL 的 root 密码（每人自己的） |
-| `WECHAT_SECRET` | ✅ | 微信小程序测试号密钥（**向组长索取**） |
+| `WECHAT_SECRET` | ✅ | 正式小程序「津采农园」的 AppSecret（**向组长索取**） |
 | `DB_USERNAME` | 否 | 默认 `root` |
-| `WECHAT_APPID` | 否 | 默认测试号 appid |
+| `WECHAT_APPID` | 否 | 默认正式小程序 appid |
 | `JWT_SECRET` | 否 | 本地开发用默认值即可，生产环境必须覆盖 |
 
 **Windows（PowerShell，永久生效，设完重启 IDEA/终端）：**
