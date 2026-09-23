@@ -21,6 +21,12 @@ spring:
         max-active: 8
         max-idle: 8
         max-wait: -1ms
+  servlet:
+    multipart:
+      enabled: true
+      # 商品图片上传限制（与 FileController 业务校验一致）
+      max-file-size: 5MB
+      max-request-size: 10MB
   jackson:
     default-property-inclusion: non_null
 
@@ -44,6 +50,11 @@ jwt:
   # 本地开发用默认值即可；生产环境务必通过环境变量 JWT_SECRET 提供强密钥
   secret: ${JWT_SECRET:local-dev-jwt-secret-not-for-production}
   expire-days: 7
+
+# 本地文件上传目录：相对路径基于后端进程工作目录（默认 backend/upload），
+# java -jar 部署时用 --app.upload-dir=/绝对路径 覆盖
+app:
+  upload-dir: upload
 
 logging:
   level:

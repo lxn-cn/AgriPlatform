@@ -114,6 +114,20 @@ public class AdminController {
         return Result.ok();
     }
 
+    /** 后台新增用户 */
+    @PostMapping("/users")
+    public Result<Void> createUser(@Valid @RequestBody PlatformDtos.CreateUserRequest request) {
+        userService.createUser(request.getNickname(), request.getPhone());
+        return Result.ok("用户已新增", null);
+    }
+
+    /** 删除用户（有订单/预约时阻止） */
+    @DeleteMapping("/users/{id}")
+    public Result<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return Result.ok("用户已删除", null);
+    }
+
     // ==================== 商品巡检 ====================
 
     /** 全平台商品列表 */

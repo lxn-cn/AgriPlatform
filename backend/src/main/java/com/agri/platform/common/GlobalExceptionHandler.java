@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
 /**
@@ -40,6 +41,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DuplicateKeyException.class)
     public ResponseEntity<Result<Void>> handleDuplicate(DuplicateKeyException e) {
         return ResponseEntity.badRequest().body(Result.fail(400, "数据已存在，请勿重复提交"));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Result<Void>> handleMaxUpload(MaxUploadSizeExceededException e) {
+        return ResponseEntity.badRequest().body(Result.fail(400, "上传文件过大（单文件不超过 5MB）"));
     }
 
     @ExceptionHandler(Exception.class)

@@ -82,6 +82,18 @@ public final class PlatformDtos {
         private Integer status;
     }
 
+    /** 后台新增用户请求 */
+    @Data
+    public static class CreateUserRequest implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        @NotBlank(message = "请填写昵称")
+        private String nickname;
+
+        @NotBlank(message = "请填写手机号")
+        private String phone;
+    }
+
     /** 反馈回复请求 */
     @Data
     public static class ReplyRequest implements Serializable {

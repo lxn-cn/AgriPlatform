@@ -29,6 +29,12 @@ export function getUsers(params) {
 export function setUserStatus(id, data) {
   return request.post('/admin/users/' + id + '/status', data)
 }
+export function createUser(data) {
+  return request.post('/admin/users', data)
+}
+export function deleteUser(id) {
+  return request.delete('/admin/users/' + id)
+}
 
 // ================= 商品管理 =================
 

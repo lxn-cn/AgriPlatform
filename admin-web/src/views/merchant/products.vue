@@ -134,8 +134,37 @@
         <el-form-item label="产地" prop="origin">
           <el-input v-model="form.origin" maxlength="64" placeholder="如：天津西青区辛口镇" />
         </el-form-item>
-        <el-form-item label="主图路径" prop="mainImage">
-          <el-input v-model="form.mainImage" placeholder="/api/file/placeholder/p1.png（可留空）" />
+        <el-form-item label="商品主图" prop="mainImage">
+          <div class="main-image-box">
+            <el-upload
+              :show-file-list="false"
+              accept=".jpg,.jpeg,.png,.webp,.gif"
+              :before-upload="beforeUpload"
+              :http-request="uploadMain"
+            >
+              <img v-if="form.mainImage" :src="form.mainImage" class="main-preview" alt="主图预览" />
+              <el-button v-else type="primary" plain>
+                <el-icon><Plus /></el-icon>&nbsp;上传主图
+              </el-button>
+            </el-upload>
+            <el-button v-if="form.mainImage" link type="danger" size="small" @click="form.mainImage = ''">
+              移除
+            </el-button>
+          </div>
+          <div class="form-tip">支持 jpg/png/webp/gif，不超过 5MB</div>
+        </el-form-item>
+        <el-form-item label="详情图">
+          <el-upload
+            v-model:file-list="detailFiles"
+            list-type="picture-card"
+            accept=".jpg,.jpeg,.png,.webp,.gif"
+            :limit="9"
+            :before-upload="beforeUpload"
+            :http-request="uploadDetail"
+          >
+            <el-icon><Plus /></el-icon>
+          </el-upload>
+          <div class="form-tip">最多 9 张，保存后按列表顺序在小程序详情页轮播</div>
         </el-form-item>
         <el-form-item label="图文描述" prop="description">
           <el-input v-model="form.description" type="textarea" :rows="4" maxlength="2000" placeholder="商品图文详情介绍" />
@@ -154,10 +183,12 @@ import { reactive, ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getMerchantProducts,
+  getMerchantProduct,
   createProduct,
   updateProduct,
   deleteProduct
 } from '../../api/merchant'
+import { uploadImage } from '../../api/upload'
 import { getCategories } from '../../api/public'
 import { PRODUCT_STATUS, money, datetime } from '../../utils/constants'
 
@@ -170,6 +201,9 @@ const editingId = ref(null)
 const formRef = ref(null)
 
 const query = reactive({ keyword: '', status: null, pageNum: 1, pageSize: 10 })
+
+// 详情图 file-list（与 images 逗号串互转）
+const detailFiles = ref([])
 
 const form = reactive({
   categoryPath: [],
@@ -242,8 +276,52 @@ async function loadList(page) {
   }
 }
 
+// ===== 图片上传 =====
+// 前端预检大小（格式由 accept 初筛，后端白名单兜底）
+function beforeUpload(file) {
+  if (file.size > 5 * 1024 * 1024) {
+    ElMessage.error('图片不能超过 5MB')
+    return false
+  }
+  return true
+}
+
+// 主图：上传成功回填表单
+async function uploadMain(options) {
+  try {
+    const res = await uploadImage(options.file)
+    form.mainImage = res.url
+  } catch (e) {
+    /* 拦截器已提示 */
+  }
+}
+
+// 详情图：上传成功追加到 file-list（旧占位图路径原样透传）
+async function uploadDetail(options) {
+  try {
+    const res = await uploadImage(options.file)
+    detailFiles.value.push({ name: res.url, url: res.url })
+  } catch (e) {
+    /* 拦截器已提示 */
+  }
+}
+
+// images 逗号串 → file-list
+function imagesToFiles(images) {
+  return String(images || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((p) => ({ name: p, url: p }))
+}
+
+// file-list → images 逗号串
+function filesToImages(files) {
+  return (files || []).map((f) => f.url).filter(Boolean).join(',')
+}
+
 // ===== 新增 / 编辑 =====
-function openDialog(row) {
+async function openDialog(row) {
   editingId.value = row ? row.id : null
   Object.assign(form, {
     categoryPath: [],
@@ -255,21 +333,28 @@ function openDialog(row) {
     mainImage: '',
     description: ''
   })
+  detailFiles.value = []
   if (row) {
-    form.categoryPath = row.categoryId ? [row.categoryId] : []
-    // 若为二级分类，补全父级路径
-    if (row.categoryPath && Array.isArray(row.categoryPath)) {
-      form.categoryPath = row.categoryPath
-    } else if (row.parentCategoryId) {
-      form.categoryPath = [row.parentCategoryId, row.categoryId]
+    try {
+      const d = await getMerchantProduct(row.id)
+      form.categoryPath = d.categoryId ? [d.categoryId] : []
+      // 若为二级分类，补全父级路径
+      if (d.categoryPath && Array.isArray(d.categoryPath)) {
+        form.categoryPath = d.categoryPath
+      } else if (d.parentCategoryId) {
+        form.categoryPath = [d.parentCategoryId, d.categoryId]
+      }
+      form.name = d.name || ''
+      form.price = Number(d.price) || 0
+      form.stock = Number(d.stock) || 0
+      form.specs = d.specs || ''
+      form.origin = d.origin || ''
+      form.mainImage = d.mainImage || ''
+      form.description = d.description || ''
+      detailFiles.value = imagesToFiles(d.images)
+    } catch (e) {
+      return
     }
-    form.name = row.name || ''
-    form.price = Number(row.price) || 0
-    form.stock = Number(row.stock) || 0
-    form.specs = row.specs || ''
-    form.origin = row.origin || ''
-    form.mainImage = row.mainImage || ''
-    form.description = row.description || ''
   }
   dialogVisible.value = true
 }
@@ -286,6 +371,7 @@ function onSave() {
       specs: form.specs,
       origin: form.origin,
       mainImage: form.mainImage,
+      images: filesToImages(detailFiles.value),
       description: form.description,
       status: editingId.value ? undefined : 1
     }
@@ -354,3 +440,25 @@ onMounted(() => {
   loadList()
 })
 </script>
+
+<style scoped>
+.main-image-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.main-preview {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #dcdfe6;
+  cursor: pointer;
+}
+.form-tip {
+  font-size: 12px;
+  color: #909399;
+  line-height: 1.6;
+  width: 100%;
+}
+</style>

@@ -9,6 +9,9 @@ target/
 __pycache__/
 *.class
 
+# 本地上传图片（运行时生成，不入库）
+backend/upload/
+
 # IDE
 .idea/
 .vscode/

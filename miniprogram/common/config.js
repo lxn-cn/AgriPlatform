@@ -4,9 +4,9 @@
 //  2. 真机调试 —— 微信真机拦截 http 图片，必须走 https（cpolar 内网穿透，
 //     黑窗口保持运行；免费版每次重启地址会变，变了更新这行）
 //  3. 局域网备用 —— 手机与电脑同一 WiFi 时模拟器可用，真机图片出不来
-const BASE_URL = 'http://localhost:8080'
-// const BASE_URL = 'https://14a59966.r8.cpolar.top'
-// const BASE_URL = 'http://10.2.185.213:8080'
+// const BASE_URL = 'http://localhost:8080'
+const BASE_URL = 'https://4967364d.r9.cpolar.cn'
+// const BASE_URL = 'http://10.2.191.35:8080'
 
 export {
     BASE_URL
