@@ -2,12 +2,16 @@
     <view class="my-page page-tab">
         <!-- 用户信息卡 -->
         <view class="user-card" @click="onUserCard">
-            <view class="avatar">{{ logged ? avatarChar : '客' }}</view>
+            <view class="avatar">
+                <image v-if="logged && userInfo.avatar" class="avatar-img" :src="imgUrl(userInfo.avatar)" mode="aspectFill" />
+                <text v-else>{{ logged ? avatarChar : '客' }}</text>
+            </view>
             <view class="user-info">
                 <text class="user-name">{{ logged ? (userInfo.nickname || '用户') : '点击登录' }}</text>
                 <text class="user-sub">{{ logged ? (userInfo.phone || '未绑定手机号') : '游客可浏览，登录后可下单预约' }}</text>
             </view>
-            <text v-if="!logged" class="login-arrow">&gt;</text>
+            <text v-if="logged" class="login-arrow edit-hint">编辑资料 &gt;</text>
+            <text v-else class="login-arrow">&gt;</text>
         </view>
 
         <!-- 我的订单九宫格 -->
@@ -58,6 +62,8 @@ export default {
                 { label: '已完成', status: '3', icon: '完' }
             ],
             menus: [
+                { label: '编辑资料', icon: '编', url: '/pages/profile/edit', login: true },
+                { label: '我的购物车', icon: '车', url: '/pages/cart', login: false },
                 { label: '我的预约', icon: '预', url: '/pages/appointment/my', login: true },
                 { label: '我的收藏', icon: '藏', url: '/pages/favorite/my', login: true },
                 { label: '收货地址', icon: '址', url: '/pages/address/list', login: true },
@@ -89,6 +95,8 @@ export default {
         onUserCard() {
             if (!this.logged) {
                 uni.navigateTo({ url: '/pages/login/login' })
+            } else {
+                uni.navigateTo({ url: '/pages/profile/edit' })
             }
         },
         goOrders(status) {
@@ -160,6 +168,15 @@ export default {
 .login-arrow {
     color: #fff;
     font-size: 40rpx;
+}
+.edit-hint {
+    font-size: 24rpx;
+}
+.avatar-img {
+    display: block;
+    width: 130rpx;
+    height: 130rpx;
+    border-radius: 50%;
 }
 .card-head {
     margin-bottom: 20rpx;

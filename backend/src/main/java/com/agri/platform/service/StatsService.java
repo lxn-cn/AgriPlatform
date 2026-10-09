@@ -38,13 +38,14 @@ public class StatsService {
     private static final DateTimeFormatter DAY_FMT = DateTimeFormatter.ofPattern("MM-dd");
 
     /**
-     * 平台总览：总交易额/订单量/预约量/用户数 + 近 7 日趋势 + 分类销售额占比
+     * 平台总览：总交易额/订单量/预约量/用户数 + 近 7 日趋势（订单/预约/新增用户） + 分类销售额占比
      */
     public Map<String, Object> adminOverview() {
         LocalDateTime start = LocalDate.now().minusDays(6).atStartOfDay();
 
         Map<String, Long> orderCount = groupByDay(orderMapper.countByDay(start));
         Map<String, Long> apptCount = groupByDay(appointmentMapper.countByDay(start));
+        Map<String, Long> userCount = groupByDay(userMapper.countByDay(start));
 
         List<Map<String, Object>> trend = new ArrayList<Map<String, Object>>();
         for (int i = 6; i >= 0; i--) {
@@ -54,6 +55,7 @@ public class StatsService {
             point.put("date", day.format(DAY_FMT));
             point.put("orderCount", orderCount.getOrDefault(key, 0L));
             point.put("appointmentCount", apptCount.getOrDefault(key, 0L));
+            point.put("newUsers", userCount.getOrDefault(key, 0L));
             trend.add(point);
         }
 

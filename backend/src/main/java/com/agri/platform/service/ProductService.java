@@ -3,6 +3,7 @@ package com.agri.platform.service;
 import com.agri.platform.common.BizException;
 import com.agri.platform.common.Constants;
 import com.agri.platform.common.PageResult;
+import com.agri.platform.dto.PlatformDtos;
 import com.agri.platform.entity.Category;
 import com.agri.platform.entity.Merchant;
 import com.agri.platform.entity.Product;
@@ -25,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 商品服务：用户侧浏览、商家侧商品维护、平台侧巡检下架
+ * 商品服务：用户侧浏览、商家侧商品维护、平台侧审核与巡检下架
  */
 @Service
 @RequiredArgsConstructor
@@ -127,6 +128,9 @@ public class ProductService {
         input.setId(null);
         input.setMerchantId(merchantId);
         input.setStatus(Constants.PRODUCT_AUDITING);
+        input.setAuditPass(Constants.PRODUCT_AUDIT_NOT_PASSED);
+        input.setRejectReason("");
+        input.setIsRecommend(Constants.PRODUCT_RECOMMEND_OFF); // 推荐位仅平台可设置
         input.setSales(0);
         input.setCreateTime(LocalDateTime.now());
         input.setUpdateTime(LocalDateTime.now());
@@ -134,43 +138,66 @@ public class ProductService {
         return input;
     }
 
-    /** 修改商品（非空字段生效，归属校验） */
+    /** 修改商品（非空字段生效，归属校验；上下架仅限已过审商品） */
     @Transactional(rollbackFor = Exception.class)
     public Product update(Long id, Product input) {
         Product db = merchantOwnedOrThrow(id);
         validateProductInput(input);
+        boolean contentEdit = false;
         if (StringUtils.hasText(input.getName())) {
             db.setName(input.getName().trim());
+            contentEdit = true;
         }
         if (input.getCategoryId() != null) {
             db.setCategoryId(input.getCategoryId());
+            contentEdit = true;
         }
         if (input.getPrice() != null) {
             db.setPrice(input.getPrice());
+            contentEdit = true;
         }
         if (input.getStock() != null) {
             db.setStock(input.getStock());
+            contentEdit = true;
         }
         if (input.getSpecs() != null) {
             db.setSpecs(input.getSpecs());
+            contentEdit = true;
         }
         if (input.getOrigin() != null) {
             db.setOrigin(input.getOrigin());
+            contentEdit = true;
         }
         if (input.getMainImage() != null) {
             db.setMainImage(input.getMainImage());
+            contentEdit = true;
         }
         if (input.getImages() != null) {
             db.setImages(input.getImages());
+            contentEdit = true;
         }
         if (input.getDescription() != null) {
             db.setDescription(input.getDescription());
+            contentEdit = true;
         }
         if (input.getStatus() != null) {
-            // 商家仅可在上架(1)/下架(0)间切换；改资料回到待审核
+            // 商家上下架：待审核商品由平台处置；未过审商品不能自行上架
+            if (db.getStatus() == Constants.PRODUCT_AUDITING) {
+                throw new BizException("待审核商品由平台审核后才能变更上下架状态");
+            }
+            if (db.getAuditPass() == null || db.getAuditPass() != Constants.PRODUCT_AUDIT_PASSED) {
+                throw new BizException("商品尚未通过平台审核，不能自行上架，请修改商品后重新提交审核");
+            }
             if (input.getStatus() == Constants.PRODUCT_ON || input.getStatus() == Constants.PRODUCT_OFF) {
                 db.setStatus(input.getStatus());
+            } else {
+                throw new BizException("状态参数非法");
             }
+        }
+        // 未过审商品（被驳回、待审核后被"删除"下架的）修改资料 = 重新提交审核
+        if (contentEdit && (db.getAuditPass() == null || db.getAuditPass() != Constants.PRODUCT_AUDIT_PASSED)) {
+            db.setStatus(Constants.PRODUCT_AUDITING);
+            db.setRejectReason("");
         }
         db.setUpdateTime(LocalDateTime.now());
         productMapper.updateById(db);
@@ -224,6 +251,53 @@ public class ProductService {
         productMapper.updateById(product);
         operLogService.record(Constants.OPERATOR_ADMIN, AuthContext.adminId(), AuthContext.name(),
                 "PRODUCT_FORCE_OFF", "强制下架商品#" + id + "（" + product.getName() + "）");
+    }
+
+    /**
+     * 商品审核（仅作用于待审核商品）：通过 = 上架并标记已过审；驳回 = 下架并记录原因（商家端可见）
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void audit(Long id, PlatformDtos.ProductAuditRequest request) {
+        Product product = productMapper.selectById(id);
+        if (product == null) {
+            throw new BizException("商品不存在");
+        }
+        if (product.getStatus() != Constants.PRODUCT_AUDITING) {
+            throw new BizException("该商品当前状态无需审核");
+        }
+        if (Boolean.TRUE.equals(request.getPass())) {
+            product.setStatus(Constants.PRODUCT_ON);
+            product.setAuditPass(Constants.PRODUCT_AUDIT_PASSED);
+            product.setRejectReason("");
+        } else {
+            product.setStatus(Constants.PRODUCT_OFF);
+            String reason = StringUtils.hasText(request.getReason()) ? request.getReason().trim() : "商品信息不符合平台要求";
+            product.setRejectReason(reason);
+        }
+        product.setUpdateTime(LocalDateTime.now());
+        productMapper.updateById(product);
+        operLogService.record(Constants.OPERATOR_ADMIN, AuthContext.adminId(), AuthContext.name(),
+                "PRODUCT_AUDIT", (Boolean.TRUE.equals(request.getPass()) ? "通过" : "驳回")
+                        + "商品审核#" + id + "（" + product.getName() + "）"
+                        + (Boolean.TRUE.equals(request.getPass()) ? "" : "，原因：" + product.getRejectReason()));
+    }
+
+    /**
+     * 设置/取消首页推荐（平台运营位，FR-01-04，记录操作日志）
+     * 注：推荐位不随下架/驳回自动清除，首页查询仅取上架商品，下架后自然不展示
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void setRecommend(Long id, PlatformDtos.ProductRecommendRequest request) {
+        Product product = productMapper.selectById(id);
+        if (product == null) {
+            throw new BizException("商品不存在");
+        }
+        boolean on = Boolean.TRUE.equals(request.getRecommend());
+        product.setIsRecommend(on ? Constants.PRODUCT_RECOMMEND_ON : Constants.PRODUCT_RECOMMEND_OFF);
+        product.setUpdateTime(LocalDateTime.now());
+        productMapper.updateById(product);
+        operLogService.record(Constants.OPERATOR_ADMIN, AuthContext.adminId(), AuthContext.name(),
+                "PRODUCT_RECOMMEND", (on ? "设为首页推荐" : "取消首页推荐") + "商品#" + id + "（" + product.getName() + "）");
     }
 
     // ==================== 私有辅助 ====================

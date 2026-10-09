@@ -74,6 +74,27 @@ public final class PlatformDtos {
         private String reason;
     }
 
+    /** 商品审核请求 */
+    @Data
+    public static class ProductAuditRequest implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        @NotNull(message = "审核结果不能为空")
+        private Boolean pass;
+
+        /** 驳回原因（驳回时必填，将展示给商家） */
+        private String reason;
+    }
+
+    /** 商品首页推荐设置请求 */
+    @Data
+    public static class ProductRecommendRequest implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        @NotNull(message = "推荐标记不能为空")
+        private Boolean recommend;
+    }
+
     /** 状态变更请求（用户启禁用 / 管理员状态等） */
     @Data
     public static class StatusRequest implements Serializable {

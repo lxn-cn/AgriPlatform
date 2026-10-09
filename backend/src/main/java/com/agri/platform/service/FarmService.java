@@ -36,9 +36,10 @@ public class FarmService {
     private final UserMapper userMapper;
 
     /**
-     * 农园列表：区县/类型/关键词筛选 + 排序（rating/price_asc/price_desc）
+     * 农园列表：区县/类型/关键词/品种筛选 + 排序（rating/price_asc/price_desc）
+     * variety：按采摘品种筛（如"草莓"命中"奶油草莓采摘"），要求农园存在上架且项目名含该关键词的采摘项目
      */
-    public PageResult<Farm> page(String district, String type, String keyword, String sort,
+    public PageResult<Farm> page(String district, String type, String keyword, String variety, String sort,
                                  long pageNum, long pageSize) {
         LambdaQueryWrapper<Farm> wrapper = new LambdaQueryWrapper<Farm>()
                 .eq(Farm::getStatus, Constants.STATUS_ON);
@@ -51,6 +52,11 @@ public class FarmService {
         if (StringUtils.hasText(keyword)) {
             wrapper.and(w -> w.like(Farm::getName, keyword.trim())
                     .or().like(Farm::getDistrict, keyword.trim()));
+        }
+        if (StringUtils.hasText(variety)) {
+            wrapper.apply("EXISTS (SELECT 1 FROM picking_project pp"
+                    + " WHERE pp.farm_id = farm.id AND pp.status = " + Constants.STATUS_ON
+                    + " AND pp.name LIKE CONCAT('%', {0}, '%'))", variety.trim());
         }
         if ("price_asc".equals(sort)) {
             wrapper.orderByAsc(Farm::getAvgPrice);

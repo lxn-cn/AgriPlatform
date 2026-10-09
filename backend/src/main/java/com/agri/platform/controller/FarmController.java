@@ -20,15 +20,16 @@ public class FarmController {
 
     private final FarmService farmService;
 
-    /** 农园列表：区县/类型/关键词 + 排序（rating/price_asc/price_desc） */
+    /** 农园列表：区县/类型/关键词/品种 + 排序（rating/price_asc/price_desc） */
     @GetMapping("/api/farms")
     public Result<PageResult<?>> page(@RequestParam(required = false) String district,
                                       @RequestParam(required = false) String type,
                                       @RequestParam(required = false) String keyword,
+                                      @RequestParam(required = false) String variety,
                                       @RequestParam(required = false) String sort,
                                       @RequestParam(defaultValue = "1") long pageNum,
                                       @RequestParam(defaultValue = "10") long pageSize) {
-        return Result.ok(farmService.page(district, type, keyword, sort, pageNum, pageSize));
+        return Result.ok(farmService.page(district, type, keyword, variety, sort, pageNum, pageSize));
     }
 
     /** 农园详情（含地址复制、交通指引、联系电话与当季项目） */

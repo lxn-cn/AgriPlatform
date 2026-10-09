@@ -107,8 +107,8 @@ public class FileController {
     public Result<Map<String, Object>> upload(@RequestParam("file") MultipartFile file,
                                               HttpServletRequest request) {
         Object role = request.getAttribute(Constants.ATTR_ROLE);
-        if (!Constants.ROLE_MERCHANT.equals(role) && !Constants.ROLE_ADMIN.equals(role)
-                && !Constants.ROLE_SUPER.equals(role)) {
+        if (!Constants.ROLE_USER.equals(role) && !Constants.ROLE_MERCHANT.equals(role)
+                && !Constants.ROLE_ADMIN.equals(role) && !Constants.ROLE_SUPER.equals(role)) {
             return Result.fail(401, "请先登录");
         }
         if (file == null || file.isEmpty()) {

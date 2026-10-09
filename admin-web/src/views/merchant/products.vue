@@ -53,7 +53,8 @@
         </el-table-column>
         <el-table-column label="状态" width="90" align="center">
           <template #default="{ row }">
-            <el-tag :type="(PRODUCT_STATUS[row.status] || {}).type || 'info'">
+            <el-tag v-if="row.status === 0 && row.rejectReason" type="danger">已驳回</el-tag>
+            <el-tag v-else :type="(PRODUCT_STATUS[row.status] || {}).type || 'info'">
               {{ (PRODUCT_STATUS[row.status] || {}).text || '未知' }}
             </el-tag>
           </template>
@@ -71,13 +72,21 @@
               size="small"
               @click="toggleStatus(row, 0)"
             >下架</el-button>
+            <!-- 仅已过审的下架商品可自行重新上架；待审核/被驳回的商品由平台审核决定 -->
             <el-button
-              v-else-if="row.status === 0"
+              v-else-if="row.status === 0 && row.auditPass === 1"
               link
               type="success"
               size="small"
               @click="toggleStatus(row, 1)"
             >上架</el-button>
+            <el-button
+              v-if="row.rejectReason"
+              link
+              type="warning"
+              size="small"
+              @click="onViewReject(row)"
+            >驳回原因</el-button>
             <el-button link type="danger" size="small" @click="onDelete(row)">删除</el-button>
           </template>
         </el-table-column>
@@ -179,7 +188,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, h } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getMerchantProducts,
@@ -363,6 +372,7 @@ function onSave() {
   formRef.value.validate(async (valid) => {
     if (!valid) return
     const categoryId = form.categoryPath[form.categoryPath.length - 1]
+    // 不传 status：新建由后端强制"待审核"；商家上下架走 toggleStatus 单独提交
     const payload = {
       categoryId,
       name: form.name.trim(),
@@ -372,17 +382,19 @@ function onSave() {
       origin: form.origin,
       mainImage: form.mainImage,
       images: filesToImages(detailFiles.value),
-      description: form.description,
-      status: editingId.value ? undefined : 1
+      description: form.description
     }
     saving.value = true
     try {
       if (editingId.value) {
-        await updateProduct(editingId.value, payload)
-        ElMessage.success('商品已更新')
+        const saved = await updateProduct(editingId.value, payload)
+        // 未过审商品（被驳回等）修改保存后由后端置回"待审核"重新送审
+        ElMessage.success(
+          saved && saved.status === 2 ? '商品已修改，已重新提交平台审核' : '商品已更新'
+        )
       } else {
         await createProduct(payload)
-        ElMessage.success('商品已创建并提交上架')
+        ElMessage.success('商品已创建，已提交平台审核')
       }
       dialogVisible.value = false
       loadList()
@@ -392,6 +404,22 @@ function onSave() {
       saving.value = false
     }
   })
+}
+
+// ===== 驳回原因查看 =====
+function onViewReject(row) {
+  ElMessageBox.alert(
+    h('div', null, [
+      h('div', { style: 'color: #f56c6c; line-height: 1.7' }, row.rejectReason),
+      h(
+        'div',
+        { style: 'color: #909399; font-size: 12px; margin-top: 12px' },
+        '修改商品并保存后将重新提交平台审核。'
+      )
+    ]),
+    '商品被驳回',
+    { type: 'warning', confirmButtonText: '知道了' }
+  ).catch(() => {})
 }
 
 // ===== 上架 / 下架 =====

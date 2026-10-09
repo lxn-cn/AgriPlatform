@@ -32,9 +32,9 @@ INSERT INTO user (openid, nickname, avatar, phone, status) VALUES
 -- 商品分类
 INSERT INTO category (id, name, parent_id, sort, status) VALUES
 (1, '时令水果', 0, 10, 1),
-(2, '时令蔬菜', 0, 20, 1),
+(2, '有机蔬菜', 0, 20, 1),
 (3, '粮油米面', 0, 30, 1),
-(4, '禽蛋水产', 0, 40, 1),
+(4, '禽蛋副食', 0, 40, 1),
 (5, '干货特产', 0, 50, 1),
 (6, '调味干货', 0, 60, 1),
 (7, '苹果', 1, 10, 1),

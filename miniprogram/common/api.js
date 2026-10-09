@@ -1,5 +1,6 @@
 // 全部接口封装（与 docs/api.md 一一对应，仅封装小程序用户端用到的接口）
 import request from './request.js'
+import { BASE_URL } from './config.js'
 
 /* ==================== 认证与账号 ==================== */
 // 小程序登录：入参 {code, nickname?}，返回 {token, userInfo}
@@ -13,6 +14,37 @@ export function getUserMe() {
 // 修改昵称/头像/手机号
 export function updateUserMe(data) {
     return request({ url: '/api/user/me', method: 'PUT', data: data })
+}
+// 图片上传（头像等）：filePath 为本地临时文件，成功 resolve 相对路径（/upload/xxx.jpg）
+export function uploadImage(filePath) {
+    return new Promise(function (resolve, reject) {
+        uni.uploadFile({
+            url: BASE_URL + '/api/file/upload',
+            filePath: filePath,
+            name: 'file',
+            header: { 'Authorization': 'Bearer ' + uni.getStorageSync('token') },
+            success: function (res) {
+                if (res.statusCode === 401) {
+                    uni.removeStorageSync('token')
+                    uni.showToast({ title: '登录已失效，请重新登录', icon: 'none' })
+                    reject(res)
+                    return
+                }
+                var body = {}
+                try { body = JSON.parse(res.data) } catch (e) { }
+                if (body.code === 200 && body.data && body.data.url) {
+                    resolve(body.data.url)
+                } else {
+                    uni.showToast({ title: body.msg || '上传失败', icon: 'none' })
+                    reject(body)
+                }
+            },
+            fail: function (err) {
+                uni.showToast({ title: '网络连接失败，请检查后端服务是否启动', icon: 'none' })
+                reject(err)
+            }
+        })
+    })
 }
 
 /* ==================== 首页与通用 ==================== */

@@ -41,7 +41,7 @@
 |---|---|---|---|
 | `/api/home/banners` | GET | 游客 | 轮播图列表（按 sort 升序）。字段：id,title,image,linkType,linkValue |
 | `/api/home/notices` | GET | 游客 | 公告列表（最新 N 条）。 |
-| `/api/home/recommended` | GET | 游客 | 推荐当季商品（status=1 按销量前 10）。 |
+| `/api/home/recommended` | GET | 游客 | 推荐当季商品：后台勾选推荐（is_recommend=1）的上架商品按销量前 10；一个都没勾选时回退销量前 10。 |
 | `/api/home/farms-brief` | GET | 游客 | 首页农园入口卡片（前 6 个）。 |
 | `/api/search` | GET | 游客 | 关键词聚合搜索 `?keyword=`，返回 `{products, farms}`。 |
 
@@ -140,6 +140,7 @@
 | `/api/admin/users/{id}/status` | POST | 启用/禁用用户。 |
 | `/api/admin/products` | GET | 全平台商品 `?status=&keyword=`。 |
 | `/api/admin/products/{id}/force-off` | POST | 违规强制下架（记录日志）。 |
+| `/api/admin/products/{id}/recommend` | POST | 设置/取消首页推荐 `{recommend:bool}`（记录日志；首页仅展示上架的推荐商品）。 |
 | `/api/admin/banners` | GET/POST/PUT/DELETE | 轮播图维护。 |
 | `/api/admin/notices` | GET/POST/PUT/DELETE | 公告维护。 |
 | `/api/admin/categories` | GET/POST/PUT/DELETE | 分类维护。 |

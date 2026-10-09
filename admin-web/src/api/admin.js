@@ -44,6 +44,12 @@ export function getAdminProducts(params) {
 export function forceOffProduct(id) {
   return request.post('/admin/products/' + id + '/force-off')
 }
+export function auditProduct(id, data) {
+  return request.post('/admin/products/' + id + '/audit', data)
+}
+export function setProductRecommend(id, data) {
+  return request.post('/admin/products/' + id + '/recommend', data)
+}
 
 // ================= 轮播图维护 =================
 

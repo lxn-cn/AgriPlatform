@@ -70,7 +70,7 @@
 </template>
 
 <script>
-import { getBanners, getNotices, getRecommended, getFarmsBrief } from '@/common/api.js'
+import { getBanners, getNotices, getRecommended, getFarmsBrief, getCategories } from '@/common/api.js'
 import { imgUrl, priceText } from '@/common/util.js'
 
 export default {
@@ -82,11 +82,12 @@ export default {
             recommended: [],
             farms: [],
             noticeIdx: 0,
+            // 默认金刚区（分类接口异常或返回为空时的兜底展示，正常情况下由接口前5个分类+农园采摘覆盖）
             kingkong: [
                 { name: '时令水果', icon: '果', color: '#FF7043', url: '/pages/product/list?catName=时令水果' },
-                { name: '时令蔬菜', icon: '蔬', color: '#66BB6A', url: '/pages/product/list?catName=时令蔬菜' },
+                { name: '有机蔬菜', icon: '蔬', color: '#66BB6A', url: '/pages/product/list?catName=有机蔬菜' },
                 { name: '粮油米面', icon: '粮', color: '#F0A64B', url: '/pages/product/list?catName=粮油米面' },
-                { name: '禽蛋水产', icon: '蛋', color: '#8D6E63', url: '/pages/product/list?catName=禽蛋水产' },
+                { name: '禽蛋副食', icon: '蛋', color: '#8D6E63', url: '/pages/product/list?catName=禽蛋副食' },
                 { name: '干货特产', icon: '干', color: '#7986CB', url: '/pages/product/list?catName=干货特产' },
                 { name: '农园采摘', icon: '采', color: '#2E8B57', url: '/pages/farm/list' }
             ]
@@ -136,6 +137,15 @@ export default {
                     })
                 }).catch(function () { that.farms = [] })
             )
+            // 金刚区改为接口驱动（FR-01-03 / 说明书4.5 字典配置能力）
+            jobs.push(
+                getCategories().then(function (res) {
+                    var tree = res && res.list ? res.list : (res || [])
+                    if (tree.length) {
+                        that.kingkong = that.buildKingkong(tree)
+                    }
+                }).catch(function () { /* 接口异常保留默认金刚区 */ })
+            )
             Promise.all(jobs).then(function () {
                 that.loading = false
                 if (stopPull) { uni.stopPullDownRefresh() }
@@ -170,6 +180,20 @@ export default {
         },
         onNoticeChange(e) {
             this.noticeIdx = e.detail.current
+        },
+        // 金刚区 = 分类接口前5个一级分类 + 固定"农园采摘"；图标取分类名首字，颜色按色板轮换
+        buildKingkong(tree) {
+            var palette = ['#FF7043', '#66BB6A', '#F0A64B', '#8D6E63', '#7986CB', '#2E8B57']
+            var list = tree.slice(0, 5).map(function (c, i) {
+                return {
+                    name: c.name,
+                    icon: c.name.charAt(0),
+                    color: palette[i % palette.length],
+                    url: '/pages/product/list?catName=' + encodeURIComponent(c.name)
+                }
+            })
+            list.push({ name: '农园采摘', icon: '采', color: '#2E8B57', url: '/pages/farm/list' })
+            return list
         },
         goKingkong(k) {
             uni.navigateTo({ url: k.url })

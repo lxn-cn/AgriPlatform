@@ -74,6 +74,10 @@
                 <text class="fav-star" :class="{ on: favored }">★</text>
                 <text class="fav-txt">{{ favored ? '已收藏' : '收藏' }}</text>
             </view>
+            <view class="fav-btn" @click="goCart">
+                <text class="cart-ico">🛒</text>
+                <text class="fav-txt">购物车</text>
+            </view>
             <view class="bar-btn bar-btn-cart" @click="addCart">加入购物车</view>
             <view class="bar-btn bar-btn-buy" @click="buyNow">立即购买</view>
         </view>
@@ -208,6 +212,9 @@ export default {
                 uni.showToast({ title: '已加入购物车', icon: 'success' })
             }).catch(function () { })
         },
+        goCart() {
+            uni.navigateTo({ url: '/pages/cart' })
+        },
         buyNow() {
             var that = this
             if (!requireLogin()) { return }
@@ -319,6 +326,9 @@ export default {
 .fav-txt {
     font-size: 20rpx;
     color: #666;
+}
+.cart-ico {
+    font-size: 40rpx;
 }
 .bar-btn {
     flex: 1;

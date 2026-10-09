@@ -31,12 +31,15 @@ public class MerchantFarmService {
     // ==================== 农园 ====================
 
     /** 本商家农园分页 */
-    public PageResult<Farm> farmPage(String keyword, long pageNum, long pageSize) {
+    public PageResult<Farm> farmPage(String keyword, String type, long pageNum, long pageSize) {
         LambdaQueryWrapper<Farm> wrapper = new LambdaQueryWrapper<Farm>()
                 .eq(Farm::getMerchantId, AuthContext.merchantId())
                 .orderByDesc(Farm::getId);
         if (StringUtils.hasText(keyword)) {
             wrapper.like(Farm::getName, keyword.trim());
+        }
+        if (StringUtils.hasText(type)) {
+            wrapper.eq(Farm::getType, type.trim());
         }
         Page<Farm> page = farmMapper.selectPage(new Page<Farm>(pageNum, pageSize), wrapper);
         return PageResult.from(page);

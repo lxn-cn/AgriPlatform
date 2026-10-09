@@ -166,9 +166,9 @@ CREATE TABLE `category`  (
 -- Records of category
 -- ----------------------------
 INSERT INTO `category` VALUES (1, '时令水果', 0, 10, 1, '2026-09-04 16:56:37');
-INSERT INTO `category` VALUES (2, '时令蔬菜', 0, 20, 1, '2026-09-04 16:56:37');
+INSERT INTO `category` VALUES (2, '有机蔬菜', 0, 20, 1, '2026-09-04 16:56:37');
 INSERT INTO `category` VALUES (3, '粮油米面', 0, 30, 1, '2026-09-04 16:56:37');
-INSERT INTO `category` VALUES (4, '禽蛋水产', 0, 40, 1, '2026-09-04 16:56:37');
+INSERT INTO `category` VALUES (4, '禽蛋副食', 0, 40, 1, '2026-09-04 16:56:37');
 INSERT INTO `category` VALUES (5, '干货特产', 0, 50, 1, '2026-09-04 16:56:37');
 INSERT INTO `category` VALUES (6, '调味干货', 0, 60, 1, '2026-09-04 16:56:37');
 INSERT INTO `category` VALUES (7, '苹果', 1, 10, 1, '2026-09-04 16:56:37');

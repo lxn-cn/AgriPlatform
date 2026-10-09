@@ -146,6 +146,22 @@ public class AdminController {
         return Result.ok("已强制下架", null);
     }
 
+    /** 商品审核（通过=上架，驳回=下架并记录原因） */
+    @PostMapping("/products/{id}/audit")
+    public Result<Void> auditProduct(@PathVariable Long id,
+                                     @Valid @RequestBody PlatformDtos.ProductAuditRequest request) {
+        productService.audit(id, request);
+        return Result.ok("审核完成", null);
+    }
+
+    /** 设置/取消首页推荐（FR-01-04） */
+    @PostMapping("/products/{id}/recommend")
+    public Result<Void> setRecommend(@PathVariable Long id,
+                                     @Valid @RequestBody PlatformDtos.ProductRecommendRequest request) {
+        productService.setRecommend(id, request);
+        return Result.ok(Boolean.TRUE.equals(request.getRecommend()) ? "已设为首页推荐" : "已取消首页推荐", null);
+    }
+
     // ==================== 内容管理 ====================
 
     /** 轮播图列表（全部） */

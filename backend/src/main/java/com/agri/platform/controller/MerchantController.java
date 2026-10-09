@@ -116,9 +116,10 @@ public class MerchantController {
     /** 本商家农园列表 */
     @GetMapping("/farms")
     public Result<PageResult<Farm>> farms(@RequestParam(required = false) String keyword,
+                                          @RequestParam(required = false) String type,
                                           @RequestParam(defaultValue = "1") long pageNum,
                                           @RequestParam(defaultValue = "10") long pageSize) {
-        return Result.ok(merchantFarmService.farmPage(keyword, pageNum, pageSize));
+        return Result.ok(merchantFarmService.farmPage(keyword, type, pageNum, pageSize));
     }
 
     /** 新建农园 */

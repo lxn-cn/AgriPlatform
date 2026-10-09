@@ -30,6 +30,17 @@
             >{{ s.label }}</view>
         </view>
 
+        <!-- 品种筛选 -->
+        <scroll-view scroll-x class="filter-bar variety-bar">
+            <view
+                v-for="v in varietyOptions"
+                :key="v"
+                class="chip"
+                :class="{ active: variety === v }"
+                @click="onVariety(v)"
+            >{{ v }}</view>
+        </scroll-view>
+
         <!-- 农园列表 -->
         <view class="container">
             <view class="card farm-card" v-for="f in list" :key="f.id" @click="goDetail(f.id)">
@@ -72,9 +83,11 @@ export default {
                 { label: '价格低→高', value: 'price_asc' },
                 { label: '价格高→低', value: 'price_desc' }
             ],
+            varietyOptions: ['全部品种', '草莓', '樱桃', '蓝莓', '葡萄', '苹果', '桃', '梨', '枣', '板栗', '甜瓜', '番茄', '萝卜'],
             district: '全部',
             type: '',
             sort: 'rating',
+            variety: '全部品种',
             list: [],
             pageNum: 1,
             total: 0,
@@ -117,6 +130,7 @@ export default {
             }
             if (that.district && that.district !== '全部') { params.district = that.district }
             if (that.type) { params.type = that.type }
+            if (that.variety && that.variety !== '全部品种') { params.variety = that.variety }
             getFarmList(params).then(function (res) {
                 var page = parsePage(res)
                 var rows = page.list.map(function (f) {
@@ -155,6 +169,11 @@ export default {
             this.sort = v
             this.load(true)
         },
+        onVariety(v) {
+            if (this.variety === v) { return }
+            this.variety = v
+            this.load(true)
+        },
         goDetail(id) {
             uni.navigateTo({ url: '/pages/farm/detail?id=' + id })
         }
@@ -180,6 +199,9 @@ export default {
 .filter-split {
     color: #EEE;
     margin: 0 4rpx;
+}
+.variety-bar {
+    padding: 0 24rpx 20rpx;
 }
 .farm-card {
     display: flex;

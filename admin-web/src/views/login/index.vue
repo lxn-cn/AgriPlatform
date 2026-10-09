@@ -38,6 +38,13 @@
         </el-form-item>
       </el-form>
 
+      <div class="login-apply">
+        还没有商家账号？
+        <el-link type="success" :underline="false" class="apply-link" @click="$router.push('/apply')">
+          我要入驻 →
+        </el-link>
+      </div>
+
       <div class="login-tip">
         演示账号：管理员 admin / 123456；商家 merchant01 / merchant123
       </div>
@@ -132,5 +139,17 @@ function onSubmit() {
 .login-btn:focus {
   background: #35b37b;
   border-color: #35b37b;
+}
+
+.login-apply {
+  margin-top: 4px;
+  text-align: center;
+  font-size: 13px;
+  color: #909399;
+}
+
+.apply-link {
+  font-size: 13px;
+  color: #2e9e6b;
 }
 </style>

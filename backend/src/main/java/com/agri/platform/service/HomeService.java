@@ -64,12 +64,23 @@ public class HomeService {
         return list;
     }
 
-    /** 推荐当季商品（按销量前 10） */
+    /**
+     * 推荐当季商品（FR-01-04：后台勾选推荐的上架商品，按销量排前 10；
+     * 一个都没勾选时回退销量前 10，保证首页不为空）
+     */
     public List<Product> recommended() {
-        return productMapper.selectList(new LambdaQueryWrapper<Product>()
+        List<Product> list = productMapper.selectList(new LambdaQueryWrapper<Product>()
                 .eq(Product::getStatus, Constants.PRODUCT_ON)
+                .eq(Product::getIsRecommend, Constants.PRODUCT_RECOMMEND_ON)
                 .orderByDesc(Product::getSales)
                 .last("LIMIT 10"));
+        if (list.isEmpty()) {
+            list = productMapper.selectList(new LambdaQueryWrapper<Product>()
+                    .eq(Product::getStatus, Constants.PRODUCT_ON)
+                    .orderByDesc(Product::getSales)
+                    .last("LIMIT 10"));
+        }
+        return list;
     }
 
     /** 首页农园入口卡片（评分前 6） */

@@ -9,6 +9,12 @@ const routes = [
     meta: { title: '登录' }
   },
   {
+    path: '/apply',
+    name: 'MerchantApply',
+    component: () => import('../views/apply/index.vue'),
+    meta: { title: '商家入驻申请' }
+  },
+  {
     path: '/',
     component: () => import('../layout/index.vue'),
     children: [
@@ -140,7 +146,8 @@ function roleHome(role) {
 
 router.beforeEach((to, from, next) => {
   const store = useUserStore()
-  if (to.path === '/login') {
+  // /apply 与 /login 同为免登录页：已登录则回到对应角色首页
+  if (to.path === '/login' || to.path === '/apply') {
     if (store.token) {
       next(roleHome(store.role))
     } else {

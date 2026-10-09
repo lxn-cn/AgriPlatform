@@ -62,6 +62,14 @@ public final class Constants {
     public static final int PRODUCT_OFF = 0;
     public static final int PRODUCT_AUDITING = 2;
 
+    // ==================== 商品过审标记（product.audit_pass：0 未过审 1 已过审） ====================
+    public static final int PRODUCT_AUDIT_NOT_PASSED = 0;
+    public static final int PRODUCT_AUDIT_PASSED = 1;
+
+    // ==================== 首页推荐标记（product.is_recommend：0 否 1 是，平台管理端勾选） ====================
+    public static final int PRODUCT_RECOMMEND_OFF = 0;
+    public static final int PRODUCT_RECOMMEND_ON = 1;
+
     // ==================== 通用上下架状态（farm / picking_project / banner / notice：1 上架/发布 0 下架/下线） ====================
     public static final int STATUS_ON = 1;
     public static final int STATUS_OFF = 0;
